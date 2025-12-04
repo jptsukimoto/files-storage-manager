@@ -1,21 +1,24 @@
-import { LocalConfig } from "../types";
+import { DiskConfigMap, DriverType, } from "../types";
 import { LocalDriver } from "./LocalDriver";
+import { S3Driver } from "./S3Driver";
 import { StorageDriver } from "./StorageDriver";
 
 export class StorageManager {
     private disks: Map<string, StorageDriver> = new Map()
 
-    register(
+    register<T extends DriverType>(
         name: string,
-        driverType: string,
-        config: LocalConfig
+        driverType: T,
+        config: DiskConfigMap[T]
     ): void {
         let driver: StorageDriver
         switch (driverType) {
             case 'local':
-                driver = new LocalDriver(config)
+                driver = new LocalDriver(config as any)
                 break;
-        
+            case 's3':
+                driver = new S3Driver(config as any)
+                break;
             default:
                 throw new Error(`Driver ${driverType} not supported`)
         }
